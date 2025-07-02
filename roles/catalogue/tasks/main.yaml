@@ -1,0 +1,44 @@
+  - name: app setup
+    include_role:
+     name: common
+     tasks_from: appsetup
+
+  - name: nodejs setup
+    include_role:
+     name: common
+     tasks_from: nodejs
+
+  - name: copying mongorepo to path
+    ansible.builtin.copy:
+     src: mongo.repo
+     dest: /etc/yum.repos.d/mongo.repo
+
+  - name: Installing mongodb-mongosh
+    ansible.builtin.dnf:
+     name: mongodb-mongosh
+     state: present
+
+  - name: loading master data into database-mongodb
+    ansible.builtin.shell: 'mongosh --host mongodb.daws-84s.store </app/db/master-data.js'
+    register: command_result
+
+  - name: print outcome
+    ansible.builtin.debug:
+     msg: "{{command_result}}"
+
+  - name: systemd setup
+    include_role:
+     name: common
+     tasks_from: systemd.yaml
+
+  # - name: deployment setup
+  #   tags:
+  #    - deployment
+  #   import_role:
+  #    name: common
+  #    tasks_from: deployment
+
+
+     
+
+
