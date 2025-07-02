@@ -1,44 +1,49 @@
-  - name: app setup
-    include_role:
-     name: common
-     tasks_from: appsetup
+- name: app setup
+  include_role:
+    name: common
+    tasks_from: app-setup
 
-  - name: nodejs setup
-    include_role:
-     name: common
-     tasks_from: nodejs
+- name: nodejs setup
+  include_role:
+    name: common
+    tasks_from: nodejs
 
-  - name: copying mongorepo to path
-    ansible.builtin.copy:
-     src: mongo.repo
-     dest: /etc/yum.repos.d/mongo.repo
+- name: copy mongodb repo
+  ansible.builtin.copy:
+    src: mongo.repo
+    dest: /etc/yum.repos.d/mongo.repo
 
-  - name: Installing mongodb-mongosh
-    ansible.builtin.dnf:
-     name: mongodb-mongosh
-     state: present
+- name: install mongodb client
+  ansible.builtin.dnf:
+    name: mongodb-mongosh
+    state: present
 
-  - name: loading master data into database-mongodb
-    ansible.builtin.shell: 'mongosh --host {{ MONGODB_HOST }} </app/db/master-data.js'
-    register: command_result
+- name: check products loaded or not
+  ansible.builtin.command: mongosh --host {{ MONGODB_HOST }} --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+  register: catalogue_output
+  # ignore_errors: true
+  # ignore_unreachable: true
 
-  - name: print outcome
-    ansible.builtin.debug:
-     msg: "{{command_result}}"
+- name: print catalogue output
+  ansible.builtin.debug:
+    msg: "{{ catalogue_output }}"
+  # ignore_errors: true
+  # ignore_unreachable: true
 
-  - name: systemd setup
-    include_role:
-     name: common
-     tasks_from: systemd.yaml
+- name: load products
+  ansible.builtin.shell: mongosh --host {{ MONGODB_HOST }} < /app/db/master-data.js
+  when: catalogue_output.stdout | int < 0
+  # ignore_errors: true
+  # ignore_unreachable: true
 
-  # - name: deployment setup
-  #   tags:
-  #    - deployment
-  #   import_role:
-  #    name: common
-  #    tasks_from: deployment
+- name: systemd setup
+  include_role:
+    name: common
+    tasks_from: systemd.yaml
 
-
-     
-
-
+# - name: Deployment
+#   tags: 
+#   - deployment
+#   import_role:
+#     name: common
+#     tasks_from: deployment
