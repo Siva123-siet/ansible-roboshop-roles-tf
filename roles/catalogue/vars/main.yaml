@@ -1,1 +1,1 @@
-MONGODB_HOST: "mongodb-dev.daws-84s.store"
+MONGODB_HOST: "mongodb-{{ env }}.daws-84s.store"
