@@ -19,7 +19,7 @@
      state: present
 
   - name: loading master data into database-mongodb
-    ansible.builtin.shell: 'mongosh --host 10.0.11.146</app/db/master-data.js'
+    ansible.builtin.shell: 'mongosh --host {{MONGODB_HOST}}</app/db/master-data.js'
     register: command_result
 
   - name: print outcome
