@@ -1,2 +1,2 @@
-CART_HOST : cart.daws-84s.store
-MYSQL_HOST: mysql.daws-84s.store
+CART_HOST : cart.backend-{{ env }}.daws-84s.store
+MYSQL_HOST: mysql-{{ env }}.daws-84s.store
